@@ -1,0 +1,224 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .trivia-wrap { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #c8102e; }
+  .logo-mark { background: #c8102e; color: #fff; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 4px; letter-spacing: 0.5px; white-space: nowrap; }
+  .header-title { font-size: 15px; color: var(--color-text-secondary); }
+  .progress-bar-wrap { background: var(--color-background-secondary); border-radius: 99px; height: 6px; margin-bottom: 1.5rem; overflow: hidden; }
+  .progress-bar { background: #c8102e; height: 6px; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
+  .question-num { font-size: 12px; color: #c8102e; font-weight: 500; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .question-text { font-size: 17px; font-weight: 500; color: var(--color-text-primary); line-height: 1.5; margin-bottom: 1.25rem; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 12px 16px; font-size: 15px; color: var(--color-text-primary); text-align: left; cursor: pointer; transition: background 0.15s, border-color 0.15s; display: flex; align-items: center; gap: 10px; }
+  .option-btn:hover:not(:disabled) { background: var(--color-background-tertiary); border-color: var(--color-border-primary); }
+  .option-btn.correct { background: #EAF3DE; border-color: #639922; color: #27500A; }
+  .option-btn.wrong { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+  .option-btn:disabled { cursor: default; }
+  .letter { width: 26px; height: 26px; border-radius: 50%; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .option-btn.correct .letter { background: #639922; color: #fff; border-color: #639922; }
+  .option-btn.wrong .letter { background: #A32D2D; color: #fff; border-color: #A32D2D; }
+  .feedback { margin-top: 1rem; padding: 12px 16px; border-radius: var(--border-radius-md); font-size: 14px; line-height: 1.6; display: none; }
+  .feedback.correct { background: #EAF3DE; color: #27500A; border-left: 3px solid #639922; }
+  .feedback.wrong { background: #FCEBEB; color: #501313; border-left: 3px solid #A32D2D; }
+  .next-btn { background: #c8102e; color: #fff; border: none; border-radius: var(--border-radius-md); padding: 12px 24px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 1rem; display: none; width: 100%; transition: opacity 0.15s; }
+  .next-btn:hover { opacity: 0.88; }
+  .score-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 2rem; text-align: center; display: none; }
+  .score-big { font-size: 56px; font-weight: 500; color: #c8102e; line-height: 1; margin-bottom: 8px; }
+  .score-label { font-size: 16px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+  .score-msg { font-size: 17px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.5rem; }
+  .score-sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+  .restart-btn { background: #c8102e; color: #fff; border: none; border-radius: var(--border-radius-md); padding: 12px 32px; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .restart-btn:hover { opacity: 0.88; }
+  .stat-pill { display: inline-flex; align-items: center; gap: 6px; background: #FCEBEB; color: #A32D2D; border-radius: 99px; padding: 4px 12px; font-size: 13px; font-weight: 500; margin-bottom: 1rem; }
+</style>
+
+<div class="trivia-wrap">
+  <div class="header">
+    <div class="logo-mark">El Espectador</div>
+    <div class="header-title">Trivia — ¿Sabes cómo protegerte en línea?</div>
+  </div>
+
+  <div id="quiz-section">
+    <p class="progress-label" id="prog-label">Pregunta 1 de 5</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:20%"></div></div>
+
+    <div class="card" id="question-card">
+      <div class="question-num" id="q-num">Pregunta 1</div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="options-list"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn">Siguiente pregunta →</button>
+  </div>
+
+  <div class="score-card" id="score-card">
+    <div class="stat-pill"><i class="ti ti-shield" aria-hidden="true"></i> Resultado final</div>
+    <div class="score-big" id="score-num">0/5</div>
+    <div class="score-label">respuestas correctas</div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="score-sub" id="score-sub"></div>
+    <button class="restart-btn" onclick="restart()">Volver a intentar</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Recibes un mensaje de WhatsApp de tu banco pidiéndote que hagas clic en un enlace urgente para evitar que bloqueen tu cuenta. ¿Qué debes hacer?",
+    options: [
+      "Hacer clic rápido para evitar el bloqueo",
+      "Reenviar el mensaje a un familiar para que lo revise",
+      "No hacer clic y comunicarte con el banco por sus canales oficiales",
+      "Responder el mensaje pidiendo más información"
+    ],
+    answer: 2,
+    feedback: "Los ciberatacantes usan la urgencia para que actúes sin pensar. Ante cualquier mensaje sospechoso, siempre verifica por otro canal —llamada directa al banco o la app oficial— antes de hacer clic en cualquier enlace."
+  },
+  {
+    q: "Vas a crear una contraseña para tu cuenta bancaria. ¿Cuál de estas prácticas es la más segura?",
+    options: [
+      "Usar la misma contraseña de tu correo para recordarla fácilmente",
+      "Usar una contraseña única y robusta, diferente para cada cuenta",
+      "Anotar la contraseña en un papel guardado en tu billetera",
+      "Usar tu fecha de nacimiento combinada con tu nombre"
+    ],
+    answer: 1,
+    feedback: "Cada cuenta debe tener una contraseña distinta y difícil de adivinar. Si reutilizas contraseñas, basta con que una cuenta sea hackeada para que todas queden expuestas. Cámbialas periódicamente y nunca las compartas."
+  },
+  {
+    q: "Le prestas tu celular a tu hijo pequeño para que juegue. ¿Qué medida reduce mejor el riesgo de exponer tu información?",
+    options: [
+      "Cerrar solo la app del banco antes de prestarlo",
+      "Configurar un usuario o perfil separado para el menor en el dispositivo",
+      "Pedirle que no abra nada importante",
+      "Activar el modo avión mientras lo usa"
+    ],
+    answer: 1,
+    feedback: "Crear un perfil de usuario independiente para el menor limita su acceso a tus apps, archivos y cuentas. Así, aunque descargue algo sin querer o toque lo que no debe, tu información personal permanece protegida."
+  },
+  {
+    q: "Terminas de revisar tu cuenta bancaria desde el celular y pasas a otra app. ¿Qué hábito deberías tener siempre?",
+    options: [
+      "Bajar el brillo de la pantalla para que nadie vea",
+      "Cerrar la sesión de la aplicación antes de salir de ella",
+      "Poner el celular boca abajo",
+      "Cambiar el volumen del dispositivo"
+    ],
+    answer: 1,
+    feedback: "El 86% de los colombianos deja las sesiones abiertas en el móvil. Cerrar la sesión cada vez que terminas de usar una app bancaria o red social es uno de los hábitos más sencillos y efectivos para proteger tu información."
+  },
+  {
+    q: "Recibes una llamada de alguien con la voz de un familiar pidiéndote dinero urgente. ¿Cuál es la mejor reacción?",
+    options: [
+      "Transferir de inmediato porque reconoces la voz",
+      "Colgar y llamar directamente al número real de ese familiar para verificar",
+      "Pedir que te expliquen mejor la situación antes de transferir",
+      "Consultar con otro familiar por chat antes de responder la llamada"
+    ],
+    answer: 1,
+    feedback: "Los deepfakes de voz pueden imitar a cualquier persona de forma convincente. Ante una solicitud urgente de dinero por llamada, siempre cuelga y marca directamente al número que ya tienes guardado de ese familiar. Esa verificación puede evitar un fraude."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('q-num').textContent = 'Pregunta ' + (current + 1);
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-label').textContent = 'Pregunta ' + (current + 1) + ' de 5';
+  document.getElementById('progress-bar').style.width = ((current + 1) / 5 * 100) + '%';
+
+  const list = document.getElementById('options-list');
+  list.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = '<span class="letter">' + letters[i] + '</span>' + opt;
+    btn.onclick = () => selectAnswer(i);
+    list.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'none';
+  fb.className = 'feedback';
+  fb.textContent = '';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.option-btn');
+  const fb = document.getElementById('feedback');
+
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    if (i === idx && i !== q.answer) btn.classList.add('wrong');
+  });
+
+  if (idx === q.answer) {
+    score++;
+    fb.className = 'feedback correct';
+    fb.innerHTML = '<strong>¡Correcto!</strong> ' + q.feedback;
+  } else {
+    fb.className = 'feedback wrong';
+    fb.innerHTML = '<strong>Incorrecto.</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = current < 4 ? 'Siguiente pregunta →' : 'Ver mi resultado';
+}
+
+document.getElementById('next-btn').onclick = function() {
+  current++;
+  if (current < 5) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+};
+
+function showResult() {
+  document.getElementById('quiz-section').style.display = 'none';
+  const sc = document.getElementById('score-card');
+  sc.style.display = 'block';
+  document.getElementById('score-num').textContent = score + '/5';
+
+  let msg, sub;
+  if (score === 5) {
+    msg = '¡Navegas con cabeza!';
+    sub = 'Conoces las acciones clave para protegerte. Comparte esta trivia con tu familia: los hábitos digitales seguros se construyen juntos.';
+  } else if (score >= 3) {
+    msg = 'Vas por buen camino, pero hay hábitos por reforzar.';
+    sub = 'Ya tienes conciencia del riesgo. Ahora el reto es convertir esas buenas prácticas en rutina: cerrar sesiones, verificar antes de hacer clic y usar contraseñas distintas para cada cuenta.';
+  } else {
+    msg = 'Tu seguridad digital necesita atención.';
+    sub = 'El primer paso siempre es informarse. Revisa tus contraseñas, activa la verificación en dos pasos y desconfía de mensajes urgentes que pidan datos o dinero, sin importar de quién parezcan venir.';
+  }
+  document.getElementById('score-msg').textContent = msg;
+  document.getElementById('score-sub').textContent = sub;
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  document.getElementById('score-card').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  loadQuestion();
+}
+
+loadQuestion();
+</script>
